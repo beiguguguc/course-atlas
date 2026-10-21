@@ -1,0 +1,249 @@
+[
+  {
+    "id": "semester-3a",
+    "parentId": null,
+    "level": 0,
+    "title": "大三上",
+    "description": "把一学期的知识，整理成自己的理解。",
+    "color": "#d5e8f1",
+    "order": 0,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "regression",
+    "parentId": "semester-3a",
+    "level": 1,
+    "title": "回归分析",
+    "description": "从变量之间的关系，走向解释、估计与预测。",
+    "color": "#d5e8f1",
+    "order": 1,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "models",
+    "parentId": "regression",
+    "level": 2,
+    "title": "模型与估计",
+    "description": "先建立模型，再找到一条最合适的直线。",
+    "color": "#d5e8f1",
+    "order": 2,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "linear-model",
+    "parentId": "models",
+    "level": 3,
+    "title": "一元线性回归模型",
+    "description": "用一个解释变量，描述响应变量的平均变化。",
+    "color": "#d5e8f1",
+    "order": 3,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true,
+    "kind": "模型",
+    "body": "将响应变量分解为一条线性趋势与随机误差。这里的线性，是指模型对参数呈线性。\n\n$$\nY_i=\\beta_0+\\beta_1x_i+\\varepsilon_i,\\qquad E(\\varepsilon_i\\mid x_i)=0\n$$\n\n- $\\beta_0$ 是截距，$\\beta_1$ 是斜率。\n\n- $E(Y_i\\mid x_i)=\\beta_0+\\beta_1x_i$ 描述条件均值，不要求每个观测点都落在直线上。",
+    "examples": [
+      {
+        "id": "linear-model-e0",
+        "title": "把实际问题写成模型",
+        "prompt": "希望研究学习时长 $x$ 与一次测验成绩 $Y$ 的关系，怎样写出一元线性回归模型？",
+        "solution": "写出线性趋势：$\\beta_0+\\beta_1x$。\n加入其他未观测因素引起的误差 $\\varepsilon$。\n将均值关系与个体波动分开理解。\n\n$Y=\\beta_0+\\beta_1x+\\varepsilon$。这是关系模型，不能单凭回归结果断言因果。"
+      }
+    ],
+    "source": "https://online.stat.psu.edu/stat501/Lesson01"
+  },
+  {
+    "id": "least-squares",
+    "parentId": "models",
+    "level": 3,
+    "title": "最小二乘估计",
+    "description": "让所有残差的平方和尽可能小。",
+    "color": "#d5e8f1",
+    "order": 4,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true,
+    "kind": "方法",
+    "body": "给定观测点，通过最小化残差平方和，求得截距与斜率的估计值。当解释变量不全相同时，一元线性回归的解如下。\n\n$$\n\\hat\\beta_1=\\frac{\\sum_{i=1}^{n}(x_i-\\bar x)(y_i-\\bar y)}{\\sum_{i=1}^{n}(x_i-\\bar x)^2},\\qquad\\hat\\beta_0=\\bar y-\\hat\\beta_1\\bar x\n$$\n\n- 优化目标：$\\min_{b_0,b_1}\\sum_{i=1}^{n}(y_i-b_0-b_1x_i)^2$。\n\n- 平方让正负偏差不会互相抵消，也使较大的偏差受到更大的惩罚。\n\n- 拟合直线经过样本均值点 $(\\bar x,\\bar y)$。",
+    "examples": [
+      {
+        "id": "least-squares-e0",
+        "title": "手算一条回归直线",
+        "prompt": "给定三个观测点 $(1,2)$、$(2,3)$、$(3,5)$，求最小二乘回归直线。",
+        "solution": "计算均值：$\\bar x=2$，$\\bar y=10/3$。\n计算离差平方和：$S_{xx}=(-1)^2+0^2+1^2=2$。\n计算交叉离差和：$S_{xy}=(-1)(-4/3)+0(-1/3)+1(5/3)=3$。\n所以 $\\hat\\beta_1=3/2$，$\\hat\\beta_0=10/3-(3/2)\\times2=1/3$。\n\n$$\\hat y=\\frac13+\\frac32x$$"
+      }
+    ],
+    "source": "https://online.stat.psu.edu/stat501/Lesson01"
+  },
+  {
+    "id": "residual",
+    "parentId": "models",
+    "level": 3,
+    "title": "残差与残差平方和",
+    "description": "用实际观测与模型预测之间的差，衡量拟合偏差。",
+    "color": "#d5e8f1",
+    "order": 5,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true,
+    "kind": "概念",
+    "body": "残差是观测值减去拟合值。残差平方和汇总样本上的拟合误差，但它本身不能代表新数据上的预测能力。\n\n$$\ne_i=y_i-\\hat y_i,\\qquad SSE=\\sum_{i=1}^{n}e_i^2\n$$\n\n- 残差为正，表示观测值高于拟合值。\n\n- 残差是样本中计算得到的量，模型误差 $\\varepsilon_i$ 通常不可直接观测。",
+    "examples": [
+      {
+        "id": "residual-e0",
+        "title": "计算三个点的残差",
+        "prompt": "对观测点 $(1,2)$、$(2,3)$、$(3,5)$，使用直线 $\\hat y=1/3+3x/2$，计算残差与 SSE。",
+        "solution": "三个拟合值分别为 $11/6$、$10/3$、$29/6$。\n残差分别为 $1/6$、$-1/3$、$1/6$。\n将残差平方后相加：$1/36+1/9+1/36$。\n\n$$SSE=\\frac16$$"
+      }
+    ],
+    "source": "https://online.stat.psu.edu/stat501/Lesson01"
+  },
+  {
+    "id": "interpretation",
+    "parentId": "regression",
+    "level": 2,
+    "title": "解释与预测",
+    "description": "读懂回归系数，也读懂预测的边界。",
+    "color": "#d5e8f1",
+    "order": 6,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "slope",
+    "parentId": "interpretation",
+    "level": 3,
+    "title": "回归系数的含义",
+    "description": "解释斜率时，关注条件均值的变化。",
+    "color": "#d5e8f1",
+    "order": 7,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true,
+    "kind": "理解",
+    "body": "在一元线性回归模型中，解释变量增加一个单位，对应的响应变量条件均值变化为斜率。\n\n$$\nE(Y\\mid x+1)-E(Y\\mid x)=\\beta_1\n$$\n\n- “均值增加”不代表每一个个体都增加相同数值。\n\n- 回归关系需要结合研究设计解释。",
+    "examples": [
+      {
+        "id": "slope-e0",
+        "title": "怎样读懂一个斜率",
+        "prompt": "某个拟合模型为 $\\hat y=40+5x$。怎样解释斜率 5？",
+        "solution": "先确定 $x$ 和 $y$ 的单位。\n保持在线性模型的语境中描述均值关系。\n\n在这个拟合模型中，$x$ 每增加一个单位，预测的 $y$ 均值增加 5 个单位。"
+      }
+    ],
+    "source": "https://online.stat.psu.edu/stat501/Lesson01"
+  },
+  {
+    "id": "prediction",
+    "parentId": "interpretation",
+    "level": 3,
+    "title": "用模型进行点预测",
+    "description": "将新的解释变量取值代入拟合方程。",
+    "color": "#d5e8f1",
+    "order": 8,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true,
+    "kind": "方法",
+    "body": "点预测给出在指定解释变量取值下的一个预测数值。它没有直接表达预测的不确定性。\n\n$$\n\\hat y_0=\\hat\\beta_0+\\hat\\beta_1x_0\n$$\n\n- 尽量在数据覆盖的取值范围内解释预测。\n\n- 单个新观测的预测区间与均值响应的置信区间含义不同。",
+    "examples": [
+      {
+        "id": "prediction-e0",
+        "title": "预测一个新的取值",
+        "prompt": "拟合方程为 $\\hat y=40+5x$，当 $x_0=3$ 时，点预测是多少？",
+        "solution": "代入 $x_0=3$。\n计算 $40+5\\times3$。\n\n$$\\hat y_0=55$$"
+      }
+    ],
+    "source": "https://online.stat.psu.edu/stat501/Lesson01"
+  },
+  {
+    "id": "diagnostics",
+    "parentId": "regression",
+    "level": 2,
+    "title": "模型诊断",
+    "description": "拟合之后，再回头检查模型是否合适。",
+    "color": "#d5e8f1",
+    "order": 9,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "statistics",
+    "parentId": "semester-3a",
+    "level": 1,
+    "title": "数理统计",
+    "description": "估计、检验，以及不确定性的表达。",
+    "color": "#e0dff2",
+    "order": 10,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "machine-learning",
+    "parentId": "semester-3a",
+    "level": 1,
+    "title": "机器学习方法",
+    "description": "从数据出发，理解模型怎样学习。",
+    "color": "#e1eadb",
+    "order": 11,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "functional-analysis",
+    "parentId": "semester-3a",
+    "level": 1,
+    "title": "泛函分析",
+    "description": "空间、算子与更一般的数学结构。",
+    "color": "#eee2d6",
+    "order": 12,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "stat-algorithms",
+    "parentId": "semester-3a",
+    "level": 1,
+    "title": "统计算法基础",
+    "description": "把统计思想，写成可以运行的算法。",
+    "color": "#f0e0e3",
+    "order": 13,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "ai-math-lab",
+    "parentId": "semester-3a",
+    "level": 1,
+    "title": "AI数学原理实验课",
+    "description": "在动手实践中，连接数学与代码。",
+    "color": "#dfe9ec",
+    "order": 14,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  },
+  {
+    "id": "semester-3b",
+    "parentId": null,
+    "level": 0,
+    "title": "大三下",
+    "description": "给下一个学期，留一点空间。",
+    "color": "#e6e3f1",
+    "order": 15,
+    "createdAt": 0,
+    "updatedAt": 0,
+    "sample": true
+  }
+]

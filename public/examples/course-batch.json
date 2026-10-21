@@ -1,0 +1,9 @@
+{
+  "schemaVersion":1,
+  "nodes":[
+    {"id":"import-demo-semester","parentId":null,"level":0,"title":"资料整理示例","description":"演示从课件批量导入完整层级。","order":100,"sample":true},
+    {"id":"import-demo-regression","parentId":"import-demo-semester","level":1,"title":"回归分析（导入示例）","description":"这份内容可以修改或删除。","sample":true},
+    {"id":"import-demo-chapter1","parentId":"import-demo-regression","level":2,"title":"第一章 · 模型与估计","sample":true},
+    {"id":"import-demo-topic1","parentId":"import-demo-chapter1","level":3,"title":"最小二乘法的目标","kind":"方法","description":"用残差平方和表达拟合目标。","body":"## 一般形式\n\n选择参数，使观测值与拟合值之间的平方偏差之和最小：\n\n$$\n\\min_{b_0,b_1}\\sum_{i=1}^{n}(y_i-b_0-b_1x_i)^2\n$$\n\n- 平方使正负偏差不会互相抵消。\n- 这里描述的是样本内的拟合目标。","examples":[{"id":"import-demo-example1","title":"计算一条直线的平方偏差","prompt":"给定点 $(1,2)$、$(2,3)$，候选直线为 $\\hat y=1+x$，求残差平方和。","solution":"两个点的拟合值分别为2和3，残差都为0，因此残差平方和为0。"}],"sourceFile":"回归分析-第一章.pdf（示例文件名）","sourcePage":"12–14","supplement":"此处可以填写老师的补充，或整理课件时需要再次核对的内容。","sample":true}
+  ]
+}

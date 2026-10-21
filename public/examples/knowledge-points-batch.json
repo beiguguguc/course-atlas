@@ -1,0 +1,7 @@
+{
+  "schemaVersion":1,
+  "nodes":[
+    {"id":"courseware-note-001","parentId":"models","level":3,"title":"课件整理笔记示例","kind":"笔记","description":"只导入知识点，复用已有的 models 章节。","body":"这里填写从课件整理的定理、条件与公式。\n\n例如 $e_i=y_i-\\hat y_i$。","examples":[],"sourceFile":"第一章讲义.pdf（示例）","sourcePage":"8","supplement":"请核对原课件后补充准确内容。","sample":true},
+    {"id":"courseware-note-002","parentId":"models","level":3,"title":"容易混淆的符号","kind":"理解","body":"| 符号 | 含义 |\n| --- | --- |\n| $Y_i$ | 随机响应变量 |\n| $y_i$ | 实际观测值 |\n| $\\hat y_i$ | 拟合值 |","sourceFile":"自己的课堂笔记","sourcePage":"","supplement":"示例采用常见符号约定，实际使用时以课程约定为准。","sample":true}
+  ]
+}
