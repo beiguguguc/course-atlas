@@ -27,6 +27,7 @@ npm.cmd run preview
 - 数据类型、验证、合并、MD转换：`src/model.ts`。
 - 本地数据库：`src/db.ts`，通过 Dexie 管理 IndexedDB 事务。
 - 界面与编辑：`src/App.tsx`、`src/Editor.tsx`、`src/styles.css`。
+- 学期封面、课程目录与连续转场：`src/BrowseSurface.tsx`、`src/browse.css`。
 - 数据结构说明：[`public/docs/DATA-STRUCTURE.md`](public/docs/DATA-STRUCTURE.md)。
 - 完整批量示例：[`public/examples/course-batch.json`](public/examples/course-batch.json)。
 - 增量知识点示例：[`public/examples/knowledge-points-batch.json`](public/examples/knowledge-points-batch.json)。
@@ -34,6 +35,12 @@ npm.cmd run preview
 「合并导入 JSON」保留已有内容；「恢复完整备份」用于将整个知识库回到备份状态，需要额外勾选确认，操作前可先导出当前备份。
 
 JSON 合并导入规则：新增 ID 加入、已有 ID 保留原内容；不覆盖已有笔记。层级错误会拒绝整批导入。页面会先显示预览数量，再由用户确认。导入 .md 时，先进入编辑器检查，保存后才写入。
+
+## 界面与动效
+
+整体使用白色背景，蓝色用于按钮、图标和选中状态。首页以学期封面展示，进入学期、课程与章节时，用 Motion 的共享布局转场连接原来的入口与新页面的标题、图标和内容区域。返回沿原路径收回，并保留各层的滚动位置。
+
+系统开启减少动态效果时，关闭布局变形和悬停位移。动效只影响显示，不改变知识库的数据结构或保存方式。
 
 每个知识点预留 `sourceFile`（来源文件）、`sourcePage`（页码或范围）、`supplement`（Markdown补充说明）。这几个字段不涉及原文件上传。
 
