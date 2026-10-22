@@ -34,7 +34,24 @@ export function validateBatch(input:unknown,existing:KnowledgeNode[]=[]):Knowled
   for(const n of parsed)if(n.parentId){const parent=map.get(n.parentId);if(!parent||parent.level!==n.level-1)throw Error(`「${n.title}」找不到正确的上级。请一并导入上级，或使用已有上级的 ID。`);}
   return parsed;
 }
-export function planMerge(existing:KnowledgeNode[],incoming:KnowledgeNode[]){const ids=new Set(existing.map(n=>n.id));const additions=incoming.filter(n=>!ids.has(n.id));return {additions,skipped:incoming.length-additions.length,nodes:[...existing,...additions]};}
+function topicContent(node:KnowledgeNode){
+  return JSON.stringify([node.title,node.description,node.color,node.order,node.sample===true,node.kind??'概念',node.body??'',
+    (node.examples??[]).map(e=>[e.id,e.title,e.prompt,e.solution]),node.sourceFile??'',node.sourcePage??'',node.supplement??'',node.source??'']);
+}
+export function planMerge(existing:KnowledgeNode[],incoming:KnowledgeNode[],overwriteTopics=false){
+  const byId=new Map(existing.map(n=>[n.id,n]));
+  const additions:KnowledgeNode[]=[],updates:KnowledgeNode[]=[];
+  let skipped=0;
+  for(const node of incoming){
+    const old=byId.get(node.id);
+    if(!old)additions.push(node);
+    else if(overwriteTopics&&old.level===3&&node.level===3&&topicContent(old)!==topicContent(node)){
+      updates.push({...node,createdAt:old.createdAt,updatedAt:Math.max(Date.now(),old.updatedAt+1)});
+    }else skipped++;
+  }
+  const replacements=new Map(updates.map(n=>[n.id,n]));
+  return {additions,updates,skipped,nodes:[...existing.map(n=>replacements.get(n.id)??n),...additions]};
+}
 export function exportMarkdown(n:KnowledgeNode){const parts=[`# ${n.title}`];if(n.description)parts.push(`> ${n.description}`);parts.push('## 定理与一般形式',n.body||'');for(const [i,e] of (n.examples||[]).entries())parts.push(`## 例题 ${i+1}：${e.title}`,e.prompt,'### 解答',e.solution);if(n.sourceFile||n.sourcePage)parts.push('## 来源',`来源文件：${n.sourceFile||'未填写'}\n\n页码：${n.sourcePage||'未填写'}`);if(n.supplement)parts.push('## 补充说明',n.supplement);return parts.join('\n\n')+'\n';}
 export function importMarkdown(content:string,filename:string,parentId:string):KnowledgeNode{
   const lines=content.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').split('\n');let title=filename.replace(/\.md$/i,'');const first=lines.findIndex(l=>l.trim());if(first>=0&&/^#\s+/.test(lines[first])){title=lines[first].replace(/^#\s+/,'').trim();lines.splice(first,1);}

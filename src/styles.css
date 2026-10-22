@@ -11,3 +11,8 @@
 .card-copy p{font-size:13px;color:#748390}.card-bottom{font-size:12px;color:#728494}.nav-label,.eyebrow{color:#718491}.local-status{font-size:12px;color:#657987}.local-status small{font-size:11px;color:#758692}.page-footer{font-size:11px;color:#778b99}.home-footnote p{font-size:12px;color:#788b99}.page-description{color:#6f808e}.heading-stats{font-size:12px;color:#758b9a}.sample-label{font-size:11px;color:#6f8596}.topic-kind,.reading-section-label{font-size:12px;color:#6d899c}.aside-card p,.aside-note{font-size:12px;color:#758a9a}.add-card small{font-size:11px;color:#8399aa}.library-intro p{font-size:12px;color:#718b9e}.data-action small,.import-help p,.import-help a{font-size:12px;color:#6f8595}.source-card dt{color:#778b9b}.breadcrumbs{font-size:12px}.markdown p,.markdown li{overflow-wrap:anywhere}.reading-heading .title-row h1{min-width:0}
 
 .restore-confirm{display:flex;align-items:flex-start;gap:10px;margin-top:24px;font-size:13px;color:#8d5050;line-height:1.7}.restore-confirm input{margin-top:4px;accent-color:#486a82;flex-shrink:0}.modal-body>.text-button{margin-top:18px}
+
+.import-numbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.import-numbers strong{font-size:clamp(28px,6vw,38px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.import-numbers span{font-size:12px;line-height:1.65;color:#6f8595}
+.modal-body>.import-backup-note{margin-top:16px;padding:14px 16px;border-radius:16px;background:#f0f6ff;color:#627e9e;font-size:12px;line-height:1.85}

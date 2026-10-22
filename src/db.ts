@@ -33,5 +33,18 @@ export async function initialize(database:AtlasDB=db){
   });
   return database.nodes.toArray();
 }
-export async function mergeBatch(input:unknown,database:AtlasDB=db){return database.transaction('rw',database.nodes,async()=>{const current=await database.nodes.toArray();const parsed=validateBatch(input,current);const plan=planMerge(current,parsed);await database.nodes.bulkAdd(plan.additions);return plan;});}
+export const topicUpdateBackupKey='before-topic-update-import-v1';
+export async function mergeBatch(input:unknown,database:AtlasDB=db,overwriteTopics=false){
+  return database.transaction('rw',database.nodes,database.meta,async()=>{
+    const current=await database.nodes.toArray();
+    const parsed=validateBatch(input,current);
+    const plan=planMerge(current,parsed,overwriteTopics);
+    if(plan.updates.length){
+      await database.meta.put({key:topicUpdateBackupKey,value:{schemaVersion:1,exportedAt:new Date().toISOString(),nodes:current}});
+    }
+    await database.nodes.bulkAdd(plan.additions);
+    await database.nodes.bulkPut(plan.updates);
+    return plan;
+  });
+}
 export async function restoreBackup(input:unknown,database:AtlasDB=db){const parsed=validateBatch(input);return database.transaction('rw',database.nodes,database.meta,async()=>{await database.nodes.clear();await database.nodes.bulkAdd(parsed);await database.meta.put({key:'initialized',value:true});await database.meta.put({key:'recent',value:[]});return parsed;});}
