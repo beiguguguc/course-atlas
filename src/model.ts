@@ -1,7 +1,7 @@
 export type Level=0|1|2|3;
 export type Example={id:string;title:string;prompt:string;solution:string};
 export type KnowledgeNode={id:string;parentId:string|null;level:Level;title:string;description:string;color:string;order:number;createdAt:number;updatedAt:number;sample?:boolean;kind?:string;body?:string;examples?:Example[];sourceFile?:string;sourcePage?:string;supplement?:string;source?:string};
-export type Backup={schemaVersion:1;exportedAt?:string;nodes:KnowledgeNode[]};
+export type Backup={schemaVersion:1;exportedAt?:string;nodes:KnowledgeNode[];links?:import('./links').KnowledgeLink[]};
 export const levelNames=['学期','课程','章节','知识点'];
 export const palette=['#d5e8f1','#bbd1e7','#e2e4ed','#dfe9e5','#eae5df','#e8e2e9'];
 export const uid=()=>crypto.randomUUID();

@@ -2,6 +2,7 @@ import type {ReactNode} from 'react';
 import {AnimatePresence,LayoutGroup,MotionConfig,motion,useReducedMotion} from 'motion/react';
 import {ArrowLeft,ArrowUpRight,BookMarked,BookOpen,ChevronRight,FileText,Layers3,Plus,Upload} from 'lucide-react';
 import {children,countTopics,levelNames,type KnowledgeNode,type Level} from './model';
+import './overview.css';
 
 type Props={
   nodes:KnowledgeNode[];
@@ -9,13 +10,14 @@ type Props={
   onNavigate:(id:string|null)=>void;
   onAdd:()=>void;
   onImportMarkdown:()=>void;
+  onOverview:()=>void;
   renderMenu:(node:KnowledgeNode)=>ReactNode;
   onSettled:(id:string|null)=>void;
 };
 const icons=[Layers3,BookOpen,BookMarked,FileText];
 const headings=['你的学期','这学期的课程','课程章节','章节知识点'];
 
-export default function BrowseSurface({nodes,current,onNavigate,onAdd,onImportMarkdown,renderMenu,onSettled}:Props){
+export default function BrowseSurface({nodes,current,onNavigate,onAdd,onImportMarkdown,onOverview,renderMenu,onSettled}:Props){
   const reduced=useReducedMotion();
   const level=(current?Math.min(current.level+1,3):0) as Level;
   const items=children(nodes,current?.id||null);
@@ -70,6 +72,7 @@ export default function BrowseSurface({nodes,current,onNavigate,onAdd,onImportMa
           <div className="surface-stats"><span>{items.length} 个{levelNames[level]}</span>{current.level<2&&<><i/><span>{countTopics(nodes,current.id)} 个知识点</span></>}</div>
         </motion.header>
         <motion.div layout className="directory-content" initial={{opacity:0,y:reduced?0:12}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:0.25,delay:reduced?0:0.16}}>
+          {current.level===1&&<button className="overview-entry" onClick={onOverview}><span className="overview-symbol" aria-hidden="true"><i/><i/><i/></span><span><strong>课程总览</strong><small>展开章节，一眼找到每个知识点</small></span><ArrowUpRight size={22}/></button>}
           {items.length>0?<>
             <div className="browse-section-heading"><h2>{headings[level]}</h2><span>选择{levelNames[level]}，继续深入</span></div>
             <div className="course-directory">
