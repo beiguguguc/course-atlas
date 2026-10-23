@@ -10,3 +10,5 @@
 .modal.wide.guide-modal{width:min(1080px,calc(100% - 36px));max-width:calc(100% - 36px);overflow:clip}
 .guide-content .guide-code-block{position:relative}
 @media(max-width:700px){.modal.wide.guide-modal{width:calc(100% - 18px);max-width:calc(100% - 18px)}}
+
+.guide-content .guide-figure{display:block;margin:22px 0 26px}.guide-figure>a{display:block;border:1px solid #e1eaf7;border-radius:16px;overflow:hidden;background:#f8fbff;line-height:0}.guide-content .markdown .guide-figure img{display:block;width:100%;max-width:100%;height:auto;margin:0;border-radius:0}.guide-content .guide-caption{display:block;margin-top:10px;font-size:12px;line-height:1.85;color:#70849f}.guide-caption>span{display:block;font-size:11px;color:#99a9be}.guide-figure>a:focus-visible{outline:2px solid #007aff;outline-offset:4px}

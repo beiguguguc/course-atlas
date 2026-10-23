@@ -19,6 +19,17 @@ function headings(text:string){
   return sections;
 }
 const sections=headings(guide);
+const guideImageRoot='https://beiguguguc.github.io/course-atlas/docs/images/';
+const guideImages:Record<string,{width:number;height:number}>={
+  'guide-import.jpg':{width:600,height:680},
+  'guide-overview.jpg':{width:1265,height:940},
+  'guide-example.jpg':{width:1265,height:1178},
+};
+function imageSource(src:string|undefined){
+  if(!src?.startsWith(guideImageRoot))return undefined;
+  const name=src.slice(guideImageRoot.length);
+  return Object.hasOwn(guideImages,name)?{src:`${import.meta.env.BASE_URL}docs/images/${name}`,...guideImages[name]}:undefined;
+}
 function CopyBlock({children}:{children:ReactNode}){
   const [state,setState]=useState<'idle'|'copied'|'error'>('idle');
   useEffect(()=>{if(state!=='copied')return;const timer=setTimeout(()=>setState('idle'),2500);return()=>clearTimeout(timer);},[state]);
@@ -33,9 +44,9 @@ export default function GuideModal({onClose}:{onClose:()=>void}){
   const jump=(id:string)=>{const panel=content.current,heading=panel?.querySelector<HTMLElement>(`#${id}`);if(!panel||!heading)return;const top=heading.getBoundingClientRect().top-panel.getBoundingClientRect().top+panel.scrollTop-20;panel.scrollTo({top:Math.max(0,top),behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});heading.focus({preventScroll:true});};
   const download=()=>{const url=URL.createObjectURL(new Blob([guide],{type:'text/markdown;charset=utf-8'}));const anchor=document.createElement('a');anchor.href=url;anchor.download='知序-使用教程与说明.md';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),2000);};
   return <Modal title="使用教程与说明" className="guide-modal" wide onClose={onClose}>
-    <div className="guide-tools"><p>从第一次使用，到整理自己的课程资料。</p><button className="soft-button" onClick={download}><Download size={16}/><span>下载 Markdown</span></button></div>
+    <div className="guide-tools"><p>也可以下载整份教程，交给 AI 阅读并协助整理。</p><button className="soft-button" onClick={download}><Download size={16}/><span>下载 Markdown</span></button></div>
     <div className="guide-layout"><nav className="guide-toc" aria-label="使用教程目录"><span className="guide-toc-label">阅读目录</span>{sections.map(section=><button key={section.id} onClick={()=>jump(section.id)}>{section.title}</button>)}</nav>
-      <div className="guide-content" ref={content} tabIndex={0} aria-label="使用教程正文"><Markdown components={{h2:({children})=><h2 id={sections.find(s=>s.title===plainText(children))?.id} tabIndex={-1}>{children}</h2>,pre:({children})=><CopyBlock>{children}</CopyBlock>}}>{guide}</Markdown></div>
+      <div className="guide-content" ref={content} tabIndex={0} aria-label="使用教程正文"><Markdown components={{h2:({children})=><h2 id={sections.find(s=>s.title===plainText(children))?.id} tabIndex={-1}>{children}</h2>,pre:({children})=><CopyBlock>{children}</CopyBlock>,img:({src,alt,title})=>{const local=imageSource(src);return local?<span className="guide-figure"><a href={local.src} target="_blank" rel="noopener noreferrer" aria-label={`查看大图：${alt||'界面示例'}`}><img {...local} alt={alt||'界面示例'} loading="lazy" decoding="async"/></a><span className="guide-caption">{title||alt} <span>点击图片查看大图</span></span></span>:<span className="image-note">[图片：{alt||'界面示例'}]</span>;}}}>{guide}</Markdown></div>
     </div><div className="modal-footer"><span>内容保存在你的浏览器，换设备前记得导出备份。</span><button className="primary-button" onClick={onClose}>开始使用</button></div>
   </Modal>;
 }
