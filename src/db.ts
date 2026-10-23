@@ -2,6 +2,7 @@ import Dexie,{type Table} from 'dexie';
 import seed from './seed.json';
 import {validateBatch,planMerge,descendants,type Backup,type KnowledgeNode} from './model';
 import {linkKey,validateLinks,type KnowledgeLink} from './links';
+import {planOutline} from './outline';
 export class AtlasDB extends Dexie{
   nodes!:Table<KnowledgeNode,string>;meta!:Table<{key:string;value:unknown},string>;links!:Table<KnowledgeLink,string>;
   constructor(name='course-atlas-v1'){super(name);this.version(1).stores({nodes:'id,parentId,level,order',meta:'key'});this.version(2).stores({links:'id,fromId,toId'});}
@@ -42,18 +43,21 @@ export async function mergeBatch(input:unknown,database:AtlasDB=db,overwriteTopi
     const links=await database.links.toArray();
     const parsed=validateBatch(input,current);
     const plan=planMerge(current,parsed,overwriteTopics);
-    const incomingLinks=validateLinks(input,plan.nodes),existingLinks=new Set(links.map(l=>l.id));
+    const outlined=planOutline(input,plan.nodes),finalById=new Map(outlined.nodes.map(n=>[n.id,n]));
+    const incomingLinks=validateLinks(input,outlined.nodes),existingLinks=new Set(links.map(l=>l.id));
     const addedLinks=incomingLinks.filter(l=>!existingLinks.has(l.id));
-    if(plan.updates.length){
+    if(plan.updates.length||outlined.updates.length){
       await database.meta.put({key:topicUpdateBackupKey,value:{schemaVersion:1,exportedAt:new Date().toISOString(),nodes:current,links}});
     }
-    await database.nodes.bulkAdd(plan.additions);
-    await database.nodes.bulkPut(plan.updates);
+    await database.nodes.bulkAdd(plan.additions.map(n=>finalById.get(n.id)!));
+    const existingIds=new Set(current.map(n=>n.id));
+    const changedIds=new Set([...plan.updates,...outlined.updates].filter(n=>existingIds.has(n.id)).map(n=>n.id));
+    await database.nodes.bulkPut([...changedIds].map(id=>finalById.get(id)!));
     await database.links.bulkAdd(addedLinks);
-    return {...plan,addedLinks,links:[...links,...addedLinks]};
+    return {...plan,nodes:outlined.nodes,outlineUpdates:outlined.updates,addedLinks,links:[...links,...addedLinks]};
   });
 }
-export async function restoreBackup(input:unknown,database:AtlasDB=db){const parsed=validateBatch(input),links=validateLinks(input,parsed);return database.transaction('rw',database.nodes,database.meta,database.links,async()=>{await database.nodes.clear();await database.nodes.bulkAdd(parsed);await database.links.clear();await database.links.bulkAdd(links);await database.meta.put({key:'initialized',value:true});await database.meta.put({key:'recent',value:[]});return parsed;});}
+export async function restoreBackup(input:unknown,database:AtlasDB=db){const parsed=planOutline(input,validateBatch(input)).nodes,links=validateLinks(input,parsed);return database.transaction('rw',database.nodes,database.meta,database.links,async()=>{await database.nodes.clear();await database.nodes.bulkAdd(parsed);await database.links.clear();await database.links.bulkAdd(links);await database.meta.put({key:'initialized',value:true});await database.meta.put({key:'recent',value:[]});return parsed;});}
 export async function exportBackup(database:AtlasDB=db):Promise<Backup>{
   return database.transaction('r',database.nodes,database.links,async()=>({schemaVersion:1,exportedAt:new Date().toISOString(),nodes:await database.nodes.toArray(),links:await database.links.toArray()}));
 }

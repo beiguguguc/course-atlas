@@ -1,39 +1,38 @@
 import {useState} from 'react';
-import {AnimatePresence,MotionConfig,motion,useReducedMotion} from 'motion/react';
-import {ArrowLeft,ArrowUpRight,BookOpen,ChevronRight,Compass,Plus} from 'lucide-react';
+import {motion,useReducedMotion} from 'motion/react';
+import {ArrowLeft,BookOpen,Compass,Plus,Search} from 'lucide-react';
 import {children,countTopics,type KnowledgeNode} from './model';
+import {compactTopicTitle,courseOutline,type OutlineGroup} from './outline';
 import './overview.css';
 
-type Props={nodes:KnowledgeNode[];course:KnowledgeNode;selected:string|null;onSelect:(id:string|null)=>void;onNavigate:(id:string)=>void;onBack:()=>void;onAdd:()=>void};
-export default function CourseOverview({nodes,course,selected,onSelect,onNavigate,onBack,onAdd}:Props){
-  const reduced=useReducedMotion(),chapters=children(nodes,course.id);
-  const active=chapters.find(n=>n.id===selected),topics=active?children(nodes,active.id):[];
-  const [filter,setFilter]=useState('');
-  const visible=topics.filter(n=>`${n.title} ${n.description}`.toLocaleLowerCase().includes(filter.trim().toLocaleLowerCase()));
-  const spring=reduced?{duration:0}:{type:'spring' as const,stiffness:260,damping:32};
-  const select=(id:string|null)=>{setFilter('');onSelect(id);};
-  return <MotionConfig reducedMotion="user"><section className="course-overview">
+type Props={nodes:KnowledgeNode[];course:KnowledgeNode;onNavigate:(id:string)=>void;onBack:()=>void;onAdd:()=>void};
+function TopicNames({topics,onNavigate}:{topics:KnowledgeNode[];onNavigate:Props['onNavigate']}){
+  return <ul className="outline-names">{topics.map(n=><li key={n.id}><button onClick={()=>onNavigate(n.id)} title={n.description||n.title}>{compactTopicTitle(n.title)}</button></li>)}</ul>;
+}
+function Branch({group,depth=0,onNavigate}:{group:OutlineGroup;depth?:number;onNavigate:Props['onNavigate']}){
+  const Heading=depth===0?'h3':'h4';
+  return <section className={`outline-branch outline-depth-${depth}`} aria-label={group.title}>
+    <Heading>{group.title}</Heading>
+    {group.topics.length>0&&<TopicNames topics={group.topics} onNavigate={onNavigate}/>}
+    {group.groups.map(child=><Branch key={JSON.stringify(child.path)} group={child} depth={depth+1} onNavigate={onNavigate}/>)}
+  </section>;
+}
+export default function CourseOverview({nodes,course,onNavigate,onBack,onAdd}:Props){
+  const [query,setQuery]=useState(''),reduced=useReducedMotion();
+  const chapters=courseOutline(nodes,course.id,query),ordered=children(nodes,course.id),total=countTopics(nodes,course.id);
+  return <motion.section className="course-overview" initial={{opacity:0,y:reduced?0:6}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:.2}}>
     <button className="back-link" onClick={onBack}><ArrowLeft size={16}/>返回课程</button>
-    <header className="overview-heading"><div><span className="browse-eyebrow"><Compass size={15}/>课程总览</span><h1>{course.title}</h1><p>先看全貌，再走进每一个知识点。</p></div><div className="overview-count"><strong>{countTopics(nodes,course.id)}</strong><span>个知识点 · {chapters.length} 个章节</span></div></header>
-    {chapters.length? <>
-      <div className="overview-instruction"><span>{active?'切换章节，或收起回到全貌':'选择一章，让知识展开'}</span>{active&&<button className="text-button" onClick={()=>select(null)}>收起全部<ArrowUpRight size={15}/></button>}</div>
-      <motion.div layout transition={spring} className={`overview-rail ${active?'has-selection':'is-idle'}`} aria-label="章节选择">
-        {chapters.map((chapter,index)=><motion.button layout="position" transition={spring} key={chapter.id} className={`chapter-lens ${active?.id===chapter.id?'selected':''}`} aria-expanded={active?.id===chapter.id} aria-controls="overview-chapter-content" onClick={()=>select(active?.id===chapter.id?null:chapter.id)}>
-          <motion.span layout="position" className="lens-number">{String(index+1).padStart(2,'0')}</motion.span><span className="lens-title">{chapter.title}<small>{children(nodes,chapter.id).length} 个知识点</small></span><ChevronRight size={18} className="lens-arrow"/>
-        </motion.button>)}
-      </motion.div>
-      <AnimatePresence initial={false} mode="wait">
-        {active&&<motion.div id="overview-chapter-content" key={active.id} className="overview-focus" initial={{opacity:0,y:reduced?0:14}} animate={{opacity:1,y:0}} exit={{opacity:0,y:reduced?0:-8}} transition={{duration:reduced?0:.24}}>
-          <div className="focus-top"><span className="focus-index" aria-hidden="true">{String(chapters.indexOf(active)+1).padStart(2,'0')}</span><div><span className="browse-eyebrow">本章知识</span><h2>{active.title}</h2>{active.description&&<p>{active.description}</p>}</div><button className="soft-button" onClick={()=>onNavigate(active.id)}>进入章节<ArrowUpRight size={16}/></button></div>
-          {topics.length>12&&<label className="overview-filter"><span>快速定位</span><input type="search" value={filter} onChange={e=>setFilter(e.target.value)} placeholder="输入本章知识点名称" aria-label="筛选本章知识点"/><small>{visible.length} / {topics.length}</small></label>}
-          {topics.length?<div className="overview-topics" aria-label={`${active.title}的知识点`}>
-            {visible.map((topic,index)=><motion.button key={topic.id} className="overview-topic" initial={{opacity:0,y:reduced?0:7}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:.23,delay:reduced?0:Math.min(index*.018,.22)}} onClick={()=>onNavigate(topic.id)}>
-              <span className="topic-number">{String(topics.indexOf(topic)+1).padStart(2,'0')}</span><span className="overview-topic-copy"><strong>{topic.title}</strong><small>{topic.kind||'知识点'}{topic.examples?.length?` · ${topic.examples.length} 道例题`:''}</small></span><ArrowUpRight size={18}/>
-            </motion.button>)}
-            {!visible.length&&<p className="overview-empty">没有找到这个名称，试试其他关键词。</p>}
-          </div>:<div className="overview-empty"><BookOpen size={28}/><p>这一章还没有知识点。</p><button className="text-button" onClick={()=>onNavigate(active.id)}>进入章节添加<ChevronRight size={16}/></button></div>}
-        </motion.div>}
-      </AnimatePresence>
-    </>:<div className="overview-empty"><BookOpen size={32}/><h2>从第一章开始</h2><p>添加章节后，这里会展开整门课的知识目录。</p><button className="primary-button" onClick={onAdd}><Plus size={17}/>添加章节</button></div>}
-  </section></MotionConfig>;
+    <header className="outline-heading"><div><span className="browse-eyebrow"><Compass size={14}/>课程总览</span><h1>{course.title}</h1></div><span className="outline-summary">{ordered.length} 章<span> / </span>{total} 个知识点</span></header>
+    {ordered.length>0&&<div className="outline-toolbar"><p>章节与各层分支全部展开，直接查找。</p><label className="outline-search"><Search size={15}/><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="查找章节、主题或知识点" aria-label="筛选课程总览"/></label></div>}
+    <div className="outline-chapters" aria-label="完整课程目录">
+      {chapters.map(({chapter,root,total,visible})=><section className="outline-chapter" key={chapter.id} aria-labelledby={`chapter-${chapter.id}`}>
+        <header className="outline-chapter-heading"><span aria-hidden="true">{String(ordered.findIndex(n=>n.id===chapter.id)+1).padStart(2,'0')}</span><h2 id={`chapter-${chapter.id}`}>{chapter.title}</h2><small>{query?`${visible} / ${total}`:total} 个知识点</small></header>
+        {total?<div className={`outline-groups ${root.groups.length?'is-grouped':'is-flat'}`}>
+          {root.groups.map(group=><Branch key={JSON.stringify(group.path)} group={group} onNavigate={onNavigate}/>)}
+          {root.topics.length>0&&<section className="outline-branch outline-ungrouped">{root.groups.length>0&&<h3>其他知识点</h3>}<TopicNames topics={root.topics} onNavigate={onNavigate}/></section>}
+        </div>:<p className="outline-empty-chapter">还没有知识点</p>}
+      </section>)}
+    </div>
+    {ordered.length===0?<div className="outline-empty"><BookOpen size={29}/><h2>从第一章开始</h2><p>添加章节后，这里会显示整门课的知识目录。</p><button className="primary-button" onClick={onAdd}><Plus size={17}/>添加章节</button></div>:!chapters.length&&<p className="outline-empty">没有找到匹配的章节、主题或知识点。</p>}
+  </motion.section>;
 }
